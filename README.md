@@ -14,7 +14,7 @@ Once you have installed Thermoengine, clone this repository into the Thermoengin
 
 Ensure that you are working within the LavAtmos directory. Import LavAtmos:
 
-``import LavAtmos``
+``import lavatmos``
 
 You should then define a composition. An often used example is bulk silicate earth (BSE):
 
