@@ -24,7 +24,7 @@ Initialise a LavAtmos object:
 
 ``system = lavatmos.melt_vapor_system()``
 
-Define a temperature range:
+Define the temperatures for which you want to perform the calculations:
 
 ``T = np.arange(1500,4050,50)``
 
