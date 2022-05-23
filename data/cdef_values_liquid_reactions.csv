@@ -1,0 +1,7 @@
+liq_oxide,endmember,ci,di,ei,fi,liq_oxide1,liq_oxide2
+MgO,Mg2SiO4,0.5,0,-0.5,0,SiO2,None
+Cr2O3,MgCr2O4,1,0,-1,0,MgO,None
+FeO,Fe2SiO4,0.5,0,-0.5,0,SiO2,None
+CaO,CaSiO3,1,0,-1,0,SiO2,None
+Na2O,Na2SiO3,1,0,1,0,SiO2,None
+K2O,KAlSiO4,2,0,-1,-2,Al2O3,SiO2

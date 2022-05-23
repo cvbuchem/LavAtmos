@@ -1,0 +1,16 @@
+# Weights of metal atom of the magma molecules 
+"Molecule name", "weight"
+MgSiO3,	 	1.004e2
+Mg2SiO4,	0.5*1.4071e2
+MgO, 		4.031e1
+FeSiO3, 	1.3193e2
+Fe2SiO4, 	0.5*2.0378e2
+FeO, 		7.185e1
+Fe, 		5.5847e1
+CaO, 		5.608e1
+Al2O3,		0.5*1.0196e2
+TiO2, 		7.990e1
+Na2O, 		6.198e1
+K2O,		9.420
+
+

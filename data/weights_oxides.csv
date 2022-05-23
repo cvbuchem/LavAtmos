@@ -1,0 +1,13 @@
+# Molecular weights of oxides (mol wt. in g/mole)
+"name", "weight"
+SiO2,  60.084
+Al2O3, 101.961
+TiO2,  79.865
+Fe2O3, 159.689
+FeO,   71.845
+MgO,   40.304
+CaO,   56.077
+Na2O,  61.979
+K2O,   94.195
+
+
