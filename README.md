@@ -30,7 +30,7 @@ Define a temperature range:
 
 And perform the gas-melt equilibrium calculations using the vaporise function:
 
-``results = system.vaporise(T, vf13_comps['BSE'])``
+``results = system.vaporise(T, comp_BSE)``
 
 Checkout the example notebooks in the notebook directory for more comprehensive examples on how to use LavAtmos.
 
