@@ -38,9 +38,6 @@ Checkout the example notebooks in the notebook directory for more comprehensive 
 
 If you are experiencing any issues when installing or using LavAtmos, please don't hesitate to open a new issue on Github. If you do, please leave as many details about your issue/error as you can.
 
-## Documentation
-
-Coming soon. 
 
 ## License and citation
 
