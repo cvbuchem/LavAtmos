@@ -525,8 +525,10 @@ class MeltState:
             # Calculate excess chemical potential
             output = self.melts.equilibrate_tp(t,P_melt,initialize=True)
             status,t,p,xmlout = output[0]
+            print('OUTPUT:',status,t,p)
             excs_dict = self.melts.get_thermo_properties_of_phase_components(xmlout,\
                                 'Liquid',mode='excess')
+            print(excs_dict)
             included_endmembers = list(excs_dict.keys())
             excs = list(excs_dict.values())            
             
