@@ -66,5 +66,21 @@ be imported directly using::
        vf13_comps[name] = vf13_comps_df[name].to_dict()
    print(vf13_comps['BSE'])
 
+Note: MELTS, which is used to calculate the melt thermodynamics, may not always be able to converge on a composition. 
+It generally works well for naturally occuring compositions.
 
+Running the equilibrium calculations
+------------------------------
 
+Initialize a LavAtmos object::
+
+   system = lavatmos.melt_vapor_system()
+
+Define the temperatures for which you want to perform the calculations::
+
+   T = np.arange(1500,4050,50)
+
+And perform the gas-melt equilibrium calculations using the vaporise function::
+
+   results = system.vaporise(T, comp_BSE)
+   print(results)
