@@ -19,5 +19,5 @@ Once you have installed Thermoengine, clone the `LavAtmos repository <https://gi
 
     git clone https://github.com/cvbuchem/LavAtmos
 
-
+If you do not have GitHub installed you can also download a zip file containing the code by going to the `Github page <https://github.com/cvbuchem/LavAtmos>`_, clicking on the green "Code" button and then clicking "Download ZIP".
 

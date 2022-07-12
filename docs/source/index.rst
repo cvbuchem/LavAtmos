@@ -1,5 +1,5 @@
 Welcome to LavAtmos's documentation!
-===================================
+====================================
 
 **LavAtmos** is a code that performs gas-melt equilibrium calculations 
 for a given temperature and melt composition. The thermodynamics of the 
