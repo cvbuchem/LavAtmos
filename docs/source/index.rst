@@ -7,7 +7,7 @@ melt are modelled by the MELTS (Ghiorso and Sack 1995) code as presented
 in the Thermoengine package.
 
 Check out the :doc:`usage` section for further information, including
-the :ref:`installation` the project.
+the :ref:`installation` of the project.
 
 .. note::
 
@@ -19,4 +19,4 @@ Contents
 .. toctree::
 
    usage
-   api
+
