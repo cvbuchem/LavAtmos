@@ -1,10 +1,10 @@
-Welcome to Lumache's documentation!
+Welcome to LavAtmos's documentation!
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+**LavAtmos** is a code that performs gas-melt equilibrium calculations 
+for a given temperature and melt composition. The thermodynamics of the 
+melt are modelled by the MELTS (Ghiorso and Sack 1995) code as presented 
+in the Thermoengine package.
 
 Check out the :doc:`usage` section for further information, including
 how to :ref:`installation` the project.

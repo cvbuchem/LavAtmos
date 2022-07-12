@@ -6,29 +6,11 @@ Usage
 Installation
 ------------
 
-To use Lumache, first install it using pip:
+Since this code uses the MELTS code as provided by the [Thermoengine](https://enki-portal.gitlab.io/ThermoEngine/) 
+package, this needs to be installed before LavAtmos may be used. We 
+suggest to follow the instructions on the [Thermoengine GitLab page](https://gitlab.com/ENKI-portal/ThermoEngine) 
+on how to run a container image locally. Note: This involves installing 
+[Docker](https://www.docker.com/get-started/) onto your system. 
 
-.. code-block:: console
-
-   (.venv) $ pip install lumache
-
-Creating recipes
-----------------
-
-To retrieve a list of random ingredients,
-you can use the ``lumache.get_random_ingredients()`` function:
-
-.. autofunction:: lumache.get_random_ingredients
-
-The ``kind`` parameter should be either ``"meat"``, ``"fish"``,
-or ``"veggies"``. Otherwise, :py:func:`lumache.get_random_ingredients`
-will raise an exception.
-
-.. autoexception:: lumache.InvalidKindError
-
-For example:
-
->>> import lumache
->>> lumache.get_random_ingredients()
-['shells', 'gorgonzola', 'parsley']
+Once you have installed Thermoengine, clone the [LavAtmos repository](https://github.com/cvbuchem/LavAtmos) into the Thermoengine directory.
 
