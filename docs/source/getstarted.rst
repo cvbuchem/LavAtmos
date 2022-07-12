@@ -70,7 +70,7 @@ Note: MELTS, which is used to calculate the melt thermodynamics, may not always 
 It generally works well for naturally occuring compositions.
 
 Running the equilibrium calculations
-------------------------------
+------------------------------------
 
 Initialize a LavAtmos object::
 

@@ -3,8 +3,8 @@
 # -- Project information
 
 project = 'LavAtmos'
-# copyright = '2022, Graziella'
-author = 'Christiaan van Buchem'
+copyright = '2022, cvbuchem'
+author = 'cvbuchem'
 
 release = '0.1'
 version = '0.1.0'

@@ -21,4 +21,5 @@ Contents
 
    installation
    getstarted
+   api
 
