@@ -1,6 +1,6 @@
 # LavAtmos
 
-This code performs gas-melt equilibrium calculations for a given temperature and melt composition. The thermodynamics of the melt are modelled by the MELTS (Ghiorso and Sack 1995) code as presented in the Thermoengine package. An in-depth explanation of the method will soon be available in Van Buchem et al. (in review).
+This code performs gas-melt equilibrium calculations for a given temperature and melt composition. We are currently working on documentation of the code which is available [here](https://lavatmos.readthedocs.io/en/latest/).
 
 ## Installation
 
