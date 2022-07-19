@@ -84,3 +84,4 @@ And perform the gas-melt equilibrium calculations using the vaporise function::
 
    results = system.vaporise(T, comp_BSE)
    print(results)
+
