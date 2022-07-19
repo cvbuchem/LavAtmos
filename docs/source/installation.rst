@@ -40,11 +40,11 @@ You can then pull the Thermoengine docker as follows::
 
 .. note:: 
     
-    If you get the following error:: none
+    If you get the following error::
 
         FATAL:   While making image from oci registry: error fetching image to cache: while building SIF from layers: unable to create new build: while searching for mksquashfs: exec: "mksquashfs": executable file not found in $PATH
 
-    A potential fix is to enter the following bash commands into your terminal:: bash
+    A potential fix is to enter the following bash commands into your terminal::
 
         export PATH="/usr/sbin:$PATH"
 
