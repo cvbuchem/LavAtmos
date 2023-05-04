@@ -467,7 +467,9 @@ class MeltState:
         # Set melt comp in thermoengine class
         self.melts.set_bulk_composition(melt_comp)
         if verbose:
-            print(f'Melt composition set to: {melt_comp}')
+            print(f'\nMelt composition set to:')
+            for sp in melt_comp:
+                print(f'{sp:5}: {melt_comp[sp]:.3e}%')
 
         # Save included oxides
         self.included_oxides = {}
@@ -546,10 +548,8 @@ class MeltState:
             # Calculate excess chemical potential
             output = self.melts.equilibrate_tp(t,P_melt,initialize=True)
             status,t,p,xmlout = output[0]
-            print('OUTPUT:',status,t,p)
             excs_dict = self.melts.get_thermo_properties_of_phase_components(xmlout,\
                                 'Liquid',mode='excess')
-            print(excs_dict)
             included_endmembers = list(excs_dict.keys())
             excs = list(excs_dict.values())            
             
