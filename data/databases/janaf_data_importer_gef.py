@@ -19,6 +19,27 @@ def janaf_data_importer():
     janaf_data['O2(g)'] = db.getphasedata(formula='O2')
     janaf_data['O(g)'] = db.getphasedata(formula='O',phase='g')
 
+    # H
+    janaf_data['H2O(g)'] = db.getphasedata(formula='H2O',phase='g')
+    janaf_data['H2(g)'] = db.getphasedata(formula='H2')
+
+    # C
+    janaf_data['CO2(g)'] = db.getphasedata(formula='CO2')
+    janaf_data['CO(g)'] = db.getphasedata(formula='CO')
+
+    # S
+    janaf_data['SO2(g)'] = db.getphasedata(formula='O2S')
+    janaf_data['SO(g)'] = db.getphasedata(formula='OS')
+
+    # N
+    janaf_data['N2(g)'] = db.getphasedata(formula='N2')
+    janaf_data['NO(g)'] = db.getphasedata(formula='NO')
+
+    # P
+    janaf_data['P(g)'] = db.getphasedata(formula='P',phase='g')
+    janaf_data['PO(g)'] = db.getphasedata(formula='OP')
+
+
     # Si
     janaf_data['SiO2(l)'] = db.getphasedata(formula='O2Si',phase='l') # used for test
 
@@ -27,6 +48,7 @@ def janaf_data_importer():
     janaf_data['Si2(g)'] = db.getphasedata(formula='Si2',phase='g')
     janaf_data['Si3(g)'] = db.getphasedata(formula='Si3',phase='g')
     janaf_data['SiO(g)'] = db.getphasedata(formula='OSi',phase='g')
+    janaf_data['SiH(g)'] = db.getphasedata(formula='HSi',phase='g')
 
     # Mg
     janaf_data['MgO(l)'] = db.getphasedata(formula='MgO',phase='l')
@@ -35,7 +57,9 @@ def janaf_data_importer():
     janaf_data['MgO(g)'] = db.getphasedata(formula='MgO',phase='g')
     janaf_data['Mg(g)'] = db.getphasedata(formula='Mg',phase='g')
     janaf_data['Mg2(g)'] = db.getphasedata(formula='Mg2',phase='g')
+    janaf_data['MgH(g)'] = db.getphasedata(formula='HMg',phase='g')
     
+
     # Al
     janaf_data['Al2O3(l)'] = db.getphasedata(formula='Al2O3',phase='l')
 
@@ -45,12 +69,14 @@ def janaf_data_importer():
     janaf_data['Al2O(g)'] = db.getphasedata(formula='Al2O',phase='g')
     janaf_data['AlO2(g)'] = db.getphasedata(formula='AlO2',phase='g')
     janaf_data['Al2O2(g)'] = db.getphasedata(formula='Al2O2',phase='g')
+    janaf_data['AlH(g)'] = db.getphasedata(formula='HAl',phase='g')
 
     # Fe
     janaf_data['FeO(l)'] = db.getphasedata(formula='FeO',phase='l')
     
     janaf_data['FeO(g)'] = db.getphasedata(formula='FeO',phase='g')
     janaf_data['Fe(g)'] = db.getphasedata(formula='Fe',phase='g')
+    janaf_data['FeO2H2(g)'] = db.getphasedata(formula='H2FeO2',phase='g')
     
     # Ca 
     janaf_data['CaO(l)'] = db.getphasedata(formula='CaO',phase='l')
@@ -63,6 +89,8 @@ def janaf_data_importer():
     janaf_data['K(g)'] = db.getphasedata(formula='K',phase='g')
     janaf_data['K2(g)'] = db.getphasedata(formula='K2',phase='g')
     janaf_data['KO(g)'] = db.getphasedata(formula='KO',phase='g')
+    janaf_data['KH(g)'] = db.getphasedata(formula='HK',phase='g')
+
 
     # Na
     janaf_data['Na2O(l)'] = db.getphasedata(formula='Na2O',phase='l') 
@@ -71,6 +99,7 @@ def janaf_data_importer():
     janaf_data['Na(g)'] = db.getphasedata(formula='Na',phase='g')
     janaf_data['Na2(g)'] = db.getphasedata(formula='Na2',phase='g')
     janaf_data['NaO(g)'] = db.getphasedata(formula='NaO',phase='g')
+    janaf_data['NaH(g)'] = db.getphasedata(formula='HNa',phase='g')
 
     # Ti
     janaf_data['TiO2(l)'] = db.getphasedata(formula='O2Ti',phase='l')
