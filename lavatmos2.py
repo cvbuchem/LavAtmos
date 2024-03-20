@@ -410,8 +410,6 @@ class melt_vapor_system:
             
             for el in self.mass_law_contribution:
 
-                index = gas.find(el)
-
                 if el == gas:
 
                     # print('el',el,'is',gas)
@@ -420,6 +418,8 @@ class melt_vapor_system:
                     contrib += self.mass_law_contribution[el]
 
                 elif el in gas:
+
+                    index = gas.find(el)
 
                     # print('el',el,'in',gas)
 
