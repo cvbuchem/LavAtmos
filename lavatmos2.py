@@ -28,7 +28,7 @@ class melt_vapor_system:
     thermo data.
     '''
 
-    def __init__(self, paths):
+    def __init__(self, paths=None):
         
         
         # Constants
@@ -56,10 +56,21 @@ class melt_vapor_system:
         self.thermo_data.update(barin_data_importer()) # barin data
 
         # FastChem 
-        self.paths = paths
+        ######################################################################
+        ## This needs to be changed depending on where FastChem is located! ##
+        ########## Comment out whichever lines suit your usecase. ############
+        ######################################################################
+
+        # For if LavAtmos2 is being run as part of the BigPipe
         self.fastchem_dir = paths.fastchem3_dir
-        self.fastchem_input = paths.fastchem3_input
         self.abundances_location = paths.element_abundances3
+        self.fastchem_column_names = ['Pbar','Tk','n_<tot>','n_g','mu']
+
+        # For if LavAtmos2 is standalone
+        # self.fastchem_dir = 'FastChem/' 
+        # self.abundances_location = self.fastchem_dir+'input/element_abundances/' 
+
+        #######################################################################
 
         # Initialise states
         self.melt = MeltState()
@@ -415,6 +426,7 @@ class melt_vapor_system:
                     # print('el',el,'is',gas)
                     # print('monoatomic')
                     # print('1 *',self.mass_law_contribution[el])
+
                     contrib += self.mass_law_contribution[el]
 
                 elif el in gas:
@@ -903,7 +915,7 @@ class melt_vapor_system:
             'param_path' : param_path,
             'tp_grid_path' : tp_point_path, 
             'output_abundance_fname' : 'output/boa_chem.dat',
-            'element_abundance_file' : self.abundance_fname
+            'element_abundance_file' : self.abundance_fname.replace('FastChem/','')
             }
         for config in fastchem_config:
             configurations = configurations.replace(f'<<{config}>>', fastchem_config[config])
@@ -956,8 +968,8 @@ class melt_vapor_system:
 
         fname = self.fastchem_dir+'output/boa_chem.dat'
         fastchem_partial_pressures = pd.read_csv(fname, sep='\s+')
-        return fastchem_partial_pressures.drop(columns=['Pbar','Tk','n_<tot>','n_g','mu'])\
-               *fastchem_partial_pressures['Pbar'].iloc[0]
+        return fastchem_partial_pressures.drop(columns=self.fastchem_column_names)\
+               *fastchem_partial_pressures[self.fastchem_column_names[0]].iloc[0]
 
     def is_iterable(self,variable):
         try:
