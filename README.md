@@ -45,6 +45,6 @@ License: [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 If you use LavAtmos results, please cite:
 
-- [Van Buchem et al. (in review)](https://arxiv.org/abs/2210.10463)
+- [Van Buchem et al. (2023)](https://arxiv.org/abs/2210.10463)
 
 Since LavAtmos makes use of MELTS, MELTS should also be cited as specified on [the MELTS webpage](https://melts.ofm-research.org/).
