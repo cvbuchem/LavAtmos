@@ -330,7 +330,6 @@ class melt_vapor_system:
             # Importing names and values from cdef file
             endmember = self.cdef.iloc[i]['endmember']
             liq_oxide1 = self.cdef.iloc[i]['liq_oxide1']
-            
             if isinstance(liq_oxide1, str):
                 liq_oxide1 = liq_oxide1.replace('(l)','')
             else:
