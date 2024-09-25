@@ -68,6 +68,10 @@ class JanafPhase(object):
 
         self.description = self.rawdata_text.splitlines()[0]
 
+        # Ensures that only 8 column are read 
+        def truncate_to_eight(fields):
+            return fields[:8] 
+        
         # Read the text file into a DataFrame.
         data = pd.read_csv(
             StringIO(self.rawdata_text),
@@ -76,8 +80,9 @@ class JanafPhase(object):
             delimiter=r'[\t\s]+',
             engine='python',
             names=['T', 'Cp', 'S', '[G-H(Tr)]/T', 'H-H(Tr)', 'Delta_fH', 'Delta_fG', 'log(Kf)'],
-            usecols=range(8) # Ignore extra columns -- those are caused by comments in the text file
+            on_bad_lines=truncate_to_eight  # Apply the custom handler
         )
+           
         self.rawdata = data
 
         # Sometimes the JANAF files have funky stuff written in them.

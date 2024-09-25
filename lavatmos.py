@@ -197,8 +197,19 @@ class melt_vapor_system:
             
             # Importing names and values from cdef file
             endmember = self.cdef.iloc[i]['endmember']
-            liq_oxide1 = self.cdef.iloc[i]['liq_oxide1'].replace('(l)','')
-            liq_oxide2 = self.cdef.iloc[i]['liq_oxide2'].replace('(l)','')
+            liq_oxide1 = self.cdef.iloc[i]['liq_oxide1']
+            
+            if isinstance(liq_oxide1, str):
+                liq_oxide1 = liq_oxide1.replace('(l)','')
+            else:
+                liq_oxide1 = 'None'
+                
+            liq_oxide2 = self.cdef.iloc[i]['liq_oxide2']
+            if isinstance(liq_oxide2, str):
+                liq_oxide2 = liq_oxide2.replace('(l)','')
+            else: 
+                liq_oxide2 = 'None'
+
             ci = self.cdef.iloc[i]['ci']
             di = self.cdef.iloc[i]['di']
             ei = self.cdef.iloc[i]['ei'] 
@@ -318,8 +329,19 @@ class melt_vapor_system:
             
             # Importing names and values from cdef file
             endmember = self.cdef.iloc[i]['endmember']
-            liq_oxide1 = self.cdef.iloc[i]['liq_oxide1'].replace('(l)','')
-            liq_oxide2 = self.cdef.iloc[i]['liq_oxide2'].replace('(l)','')
+            liq_oxide1 = self.cdef.iloc[i]['liq_oxide1']
+            
+            if isinstance(liq_oxide1, str):
+                liq_oxide1 = liq_oxide1.replace('(l)','')
+            else:
+                liq_oxide1 = 'None'
+                
+            liq_oxide2 = self.cdef.iloc[i]['liq_oxide2']
+            if isinstance(liq_oxide2, str):
+                liq_oxide2 = liq_oxide2.replace('(l)','')
+            else: 
+                liq_oxide2 = 'None'
+            
             ci = self.cdef.iloc[i]['ci']
             di = self.cdef.iloc[i]['di']
             ei = self.cdef.iloc[i]['ei'] 
