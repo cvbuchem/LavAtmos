@@ -74,42 +74,54 @@ class CachedResults:
         values = np.array([result[2] for result in results])
         
         T_unique = np.unique(points[:, 0])
-        print('T_unique',T_unique)
-        print(len(T_unique))
         P_unique = np.unique(points[:, 1])
         
         T_min, T_max = points[:, 0].min(), points[:, 0].max()
         P_min, P_max = points[:, 1].min(), points[:, 1].max()
         
+        # Interpolation for PO2 estimate
         if T_min <= T <= T_max and P_min <= P <= P_max:
+
+            print('\nPoint falls between existing cache values.') 
+            print('Using interpolation for first estimate of PO2.')
+
+            # 2D interpolation in TP space
             if len(T_unique) > 1 and len(P_unique) > 1:
-                print('Point falls between existing cache values.') 
-                print('Using interpolation for first estimate of fO2.')
                 estimated_value = griddata(points, values, (T, P), method='linear')
-                print(f'Estimated value: {estimated_value}')
-                return estimated_value
+            
+            # 1D interpolation in T space
             elif len(T_unique) > 1:
-                print('Interpolating along P dimension.')
                 f = interp1d(points[:, 0], values, kind='linear', fill_value="extrapolate")
-                return f(T)
+                estimated_value = f(T)
+            
+            # 1D interplation in P space
             elif len(P_unique) > 1:
-                print('Interpolating along T dimension.')
                 f = interp1d(points[:, 1], values, kind='linear', fill_value="extrapolate")
-                return f(P)
+                estimated_value = f(P)
+
+            print(f'Estimated value: {estimated_value}')
+            return estimated_value
         
+        # Extrapolation for PO2 estimate
         elif (T_min - 200 <= T <= T_max + 200) and (10**(np.log10(P_min) - 1) <= P <= 10**(np.log10(P_max) + 1)):
-            print('Point falls within 200 K and 1 order of magnitude of cached values.')
-            print('Using extrapolation for first estimate of fO2.')
+            
+            print('\nPoint falls within 200 K and 1 order of magnitude of cached values.')
+            print('Using extrapolation for first estimate of PO2.')
+            
+            # 2D extrapolation in TP space
             if len(T_unique) > 1 and len(P_unique) > 1:
                 interpolator = LinearNDInterpolator(points, values)
                 estimated_value = interpolator(T, P)
-                print(f'Estimated value: {estimated_value}')
-                return estimated_value
-            elif len(P_unique) > 1:
-                print('Extrapolating along P dimension.')
-                return self.linear_extrapolation_1d(points[:, 0], values, T)
+
+            # 1D extrapolation in T space
             elif len(T_unique) > 1:
-                print('Extrapolating along T dimension.')
-                return self.linear_extrapolation_1d(points[:, 1], values, P)
+                estimated_value = self.linear_extrapolation_1d(points[:, 1], values, P)
+                
+            # 1D extrapolation in P space
+            elif len(P_unique) > 1:
+                estimated_value = self.linear_extrapolation_1d(points[:, 0], values, T)
+            
+            print(f'Estimated value: {estimated_value}')
+            return estimated_value
         
         return None
