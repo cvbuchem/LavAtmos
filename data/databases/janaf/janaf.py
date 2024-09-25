@@ -68,7 +68,6 @@ class JanafPhase(object):
 
         self.description = self.rawdata_text.splitlines()[0]
 
-        
         # Ensures that only 8 column are read 
         def truncate_to_eight(fields):
             return fields[:8] 
