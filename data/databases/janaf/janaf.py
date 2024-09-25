@@ -69,9 +69,11 @@ class JanafPhase(object):
         self.description = self.rawdata_text.splitlines()[0]
 
         
+        # Ensures that only 8 column are read 
         def truncate_to_eight(fields):
-            return fields[:8]
+            return fields[:8] 
         
+        # Read the text file into a DataFrame.
         data = pd.read_csv(
             StringIO(self.rawdata_text),
             skiprows=2,
