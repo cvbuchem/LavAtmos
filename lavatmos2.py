@@ -677,7 +677,7 @@ class melt_vapor_system:
 
         # Open abundance file template
         # TODO: Consider not hardcoding this (moving to paths file)
-        template_name = 'element_abundances_template2.dat'
+        template_name = 'element_abundances_template.dat'
         output_name = 'element_abundances_output.dat'
         solar_abund_name = 'element_abundances_solar.dat'
 
@@ -723,8 +723,17 @@ class melt_vapor_system:
             
             # Importing names and values from cdef file
             endmember = self.cdef.iloc[i]['endmember']
-            liq_oxide1 = self.cdef.iloc[i]['liq_oxide1'].replace('(l)','')
-            liq_oxide2 = self.cdef.iloc[i]['liq_oxide2'].replace('(l)','')
+            liq_oxide1 = self.cdef.iloc[i]['liq_oxide1']
+            if isinstance(liq_oxide1, str):
+                liq_oxide1 = liq_oxide1.replace('(l)','')
+            else:
+                liq_oxide1 = 'None'
+                
+            liq_oxide2 = self.cdef.iloc[i]['liq_oxide2']
+            if isinstance(liq_oxide2, str):
+                liq_oxide2 = liq_oxide2.replace('(l)','')
+            else: 
+                liq_oxide2 = 'None'
             ci = self.cdef.iloc[i]['ci']
             di = self.cdef.iloc[i]['di']
             ei = self.cdef.iloc[i]['ei'] 
@@ -822,8 +831,18 @@ class melt_vapor_system:
             
             # Importing names and values from cdef file
             endmember = self.cdef.iloc[i]['endmember']
-            liq_oxide1 = self.cdef.iloc[i]['liq_oxide1'].replace('(l)','')
-            liq_oxide2 = self.cdef.iloc[i]['liq_oxide2'].replace('(l)','')
+            liq_oxide1 = self.cdef.iloc[i]['liq_oxide1']
+            if isinstance(liq_oxide1, str):
+                liq_oxide1 = liq_oxide1.replace('(l)','')
+            else:
+                liq_oxide1 = 'None'
+                
+            liq_oxide2 = self.cdef.iloc[i]['liq_oxide2']
+            if isinstance(liq_oxide2, str):
+                liq_oxide2 = liq_oxide2.replace('(l)','')
+            else: 
+                liq_oxide2 = 'None'
+
             ci = self.cdef.iloc[i]['ci']
             di = self.cdef.iloc[i]['di']
             ei = self.cdef.iloc[i]['ei'] 
@@ -954,7 +973,7 @@ class melt_vapor_system:
     def read_fastchem_partial_pressures(self):
 
         fname = self.fastchem_dir+'output/boa_chem.dat'
-        fastchem_partial_pressures = pd.read_csv(fname, sep='\s+')
+        fastchem_partial_pressures = pd.read_csv(fname, sep=r'\s+')
         return fastchem_partial_pressures.drop(columns=self.fastchem_column_names)\
                *fastchem_partial_pressures[self.fastchem_column_names[0]].iloc[0]
 
