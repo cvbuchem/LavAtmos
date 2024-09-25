@@ -9,6 +9,7 @@ import collections
 import sys
 import subprocess
 import os
+import warnings
 
 # Thermoengine modules
 from thermoengine import equilibrate 
@@ -143,7 +144,7 @@ class melt_vapor_system:
 
     def vaporise(self, T, P_volatile, melt_comp, volatile_comp, P_melt = 0.01,\
                           fO2_initial_guess = 1e-10,\
-                          verbose = True):
+                          verbose = False):
 
 
 
@@ -173,7 +174,7 @@ class melt_vapor_system:
 
                 # If cached value was found, skip calculation
                 if cached_value is not None:
-                    print('Found cached version for given input parameters, returning cached value.')
+                    print('\nFound cached version for given input parameters, returning cached value.')
                     fO2[i], O_abun_best, best_mb_output = cached_value
 
                 # If no cached value was found, perform full calculation
@@ -195,23 +196,35 @@ class melt_vapor_system:
                     if estimated_value is not None:
                         fO2_tries = np.append(estimated_value, fO2_tries)
 
-                    print('fO2_tries:',fO2_tries)
+                    # print('fO2_tries:',fO2_tries)
     
                     while np.abs(self.mass_balance_eq) > 1e-8 and count < len(fO2_tries):
 
                         fO2_initial_guess = fO2_tries[count]
-                        print(f'\nTry #{count}')
-                        print('fO2 initial guess:', fO2_initial_guess)
+
+                        if verbose:
+                            print(f'\nTry #{count}')
+                            print('fO2 initial guess:', fO2_initial_guess)
                         
+                        # Ignores fsolve warnings if not verbose
+                        if not verbose:
+                            warnings.filterwarnings("ignore", message="xtol=0.000000 is too small", category=RuntimeWarning)
+                            warnings.filterwarnings("ignore", message="The iteration is not making good progress", category=RuntimeWarning)
+
                         # Calculate fO2
                         results_opt = optimize.fsolve(self.mass_balance_equation_fastchem,\
-                                                      fO2_initial_guess,args=([t],volatile_comp),xtol=1e-10,
+                                                      fO2_initial_guess,args=([t],volatile_comp,verbose),xtol=1e-10,
                                                       factor=factor, maxfev=maxfev)
-                        print('Results opt:',results_opt)
-                        print('Mass balance equation:',self.mass_balance_eq)
+                            
+                        if verbose:
+                            print('Results opt:',results_opt)
+                            print('Mass balance equation:',self.mass_balance_eq)
 
                         if np.abs(self.mass_balance_eq) < np.abs(best_mb_output)+np.abs(best_mb_output)*0.1:
-                            print('Found new best solution!')
+                            
+                            if verbose:
+                                print('Found new best solution!')
+    
                             fO2[i] = results_opt[0]
                             best_mb_output = self.mass_balance_eq
                             O_abun_best = copy(self.O_abun)
@@ -308,7 +321,7 @@ class melt_vapor_system:
 
         return mb
 
-    def mass_balance_equation_fastchem(self,fO2,T, volatile_comp):
+    def mass_balance_equation_fastchem(self,fO2,T, volatile_comp, verbose):
 
         '''
         Equation that needs to be solved for fO2.
@@ -341,11 +354,14 @@ class melt_vapor_system:
         # for i,vapor in enumerate(self.cdef.index):
         #     print(f'{vapor:>10}: {vapor_partial_pressures[i].iloc[0]:.4e}')
         
-        print('fO2',fO2)
         P_outgassed = vapor_partial_pressures.sum(axis=1).iloc[0]+fO2
         P_boa = P_outgassed + self.P_volatile
-        print('P_outgassed',P_outgassed)
-        print('P BOA',P_boa)
+
+        if verbose:
+            print('fO2',fO2)
+            print('P_outgassed',P_outgassed)
+            print('P BOA',P_boa)
+        
         # print('O_abun init',O_abun_init)
         # O_abun_init = 1e3
         # print('############# Innter loop ###############')
@@ -356,7 +372,6 @@ class melt_vapor_system:
         best_inner_loop_output = 1e20
         count = 0
 
-        # O_abun_tries = [1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12]
         O_abun_tries = [1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12]
 
 
@@ -366,16 +381,21 @@ class melt_vapor_system:
 
             # print(f'\nTry #{count}')
             # print('O initial guess:', O_abun_init)
-            
+
+            # if not verbose:
+                # warnings.filterwarnings("ignore", message="xtol=0.000000 is too small", category=RuntimeWarning)
+                # warnings.filterwarnings("ignore", message="The iteration is not making good progress", category=RuntimeWarning)
+
             results_opt = optimize.fsolve(self.inner_loop,\
                                           O_abun_init, args=(T,fO2,P_boa,vapor_partial_pressures, volatile_comp),\
                                           factor=90,xtol=xtol)
-                
-            print('Results opt:',results_opt)
-            print('Inner loop output:',self.inner_loop_output)
+            if verbose:
+                print('Results opt:',results_opt)
+                print('Inner loop output:',self.inner_loop_output)
 
             if np.abs(self.inner_loop_output) < np.abs(best_inner_loop_output)+np.abs(best_inner_loop_output)*0.1:
-                print('Found new best solution!')
+                if verbose:
+                    print('Found new best solution!')
                 self.O_abun = results_opt[0]
                 best_inner_loop_output = self.inner_loop_output
                 count += 1
@@ -454,9 +474,10 @@ class melt_vapor_system:
             #     self.mass_balance_eq += self.ml_values['ml_value'].loc[gas]*partial_pressures[gas].iloc[0]
             #     # print('mass balance', mass_balance_eq)
         
-        print('Tried fO2:', fO2[0])
-        print('MASS BALANCE EQ:',self.mass_balance_eq)
-        print('\n')
+        if verbose:
+            print('Tried fO2:', fO2[0])
+            print('MASS BALANCE EQ:',self.mass_balance_eq)
+            print('\n')
 
         return self.mass_balance_eq
 
