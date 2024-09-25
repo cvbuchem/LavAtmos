@@ -1,0 +1,35 @@
+#Atmospheric profile input file
+<<tp_grid_path>>
+
+#Chemistry calculation type (gas phase only = g, equilibrium condensation = ce, rainout condensation = cr)
+g
+
+#Chemistry output file
+<<output_abundance_fname>> output/condensates.dat
+
+#Monitor output file
+output/monitor.dat
+
+#FastChem console verbose level (1 - 4); 1 = almost silent, 4 = detailed console output
+0
+
+#Output mixing ratios (MR) or particle number densities (ND, default)
+MR
+
+#Element abundance file   
+<<element_abundance_file>>
+
+#Species data files    
+input/logK/logK.dat input/logK/logK_condensates.dat
+
+#Accuracy of chemistry iteration
+1.0e-6
+
+#Accuracy of element conservation
+1.0e-6
+
+#Max number of chemistry iterations 
+150000  
+
+#Max number internal solver iterations
+100000
