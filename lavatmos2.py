@@ -17,7 +17,7 @@ from thermoengine import model
 # Local modules
 from data.databases.janaf_data_importer_gef import janaf_data_importer
 from data.databases.barin_data_importer_gef import barin_data_importer
-
+from library.cacher import CachedResults
 
 class melt_vapor_system:
     
@@ -38,9 +38,12 @@ class melt_vapor_system:
         # Points used as a smart start for fO2
         t_dep_points = {}
         t_dep_points['T'] = [2000,2500,3000,3500,4000]
-        t_dep_points['fO2'] = np.log10([1e-16,1e-11,1e-5,1e-2,1e0])
+        # t_dep_points['fO2'] = np.log10([1e-16,1e-11,1e-5,1e-2,1e0])
+        t_dep_points['fO2'] = np.log10([1e-18,1e-13,1e-7,1e-4,1e-2])
         self.fO2_interp_func = interp1d(t_dep_points['T'], t_dep_points['fO2'], fill_value='extrapolate')
 
+        # Initializing cache class
+        self.cache = CachedResults()
         
         # Importing stoichiometries for reactions
         fname_cdef_values = 'cdef_values_vapor_reactions_2.csv'
@@ -62,13 +65,13 @@ class melt_vapor_system:
         ######################################################################
 
         # For if LavAtmos2 is being run as part of the BigPipe
-        self.fastchem_dir = paths.fastchem3_dir
-        self.abundances_location = paths.element_abundances3
-        self.fastchem_column_names = ['Pbar','Tk','n_<tot>','n_g','mu']
+        # self.fastchem_dir = paths.fastchem3_dir
+        # self.abundances_location = paths.element_abundances3
 
         # For if LavAtmos2 is standalone
-        # self.fastchem_dir = 'FastChem/' 
-        # self.abundances_location = self.fastchem_dir+'input/element_abundances/' 
+        self.fastchem_dir = 'FastChem/' 
+        self.abundances_location = self.fastchem_dir+'input/element_abundances/' 
+        self.fastchem_column_names = ['#p(bar)','T(K)','n_<tot>(cm-3)','n_g(cm-3)','m(u)']
 
         #######################################################################
 
@@ -81,7 +84,7 @@ class melt_vapor_system:
         # Vaporised elements
         self.vaporised_elements = ['Al', 'Ca', 'Fe', 'K', 'Mg', 'Na',\
                                    'O', 'Si', 'Ti']
-                            
+                             
         self.all_elements = ['C','H','He','N','O','P','S','Si','Ti',\
                              'V','Cl','K','Na','Mg','F','Ca','Fe','Al']
 
@@ -142,6 +145,8 @@ class melt_vapor_system:
                           fO2_initial_guess = 1e-10,\
                           verbose = True):
 
+
+
         self.P_volatile = P_volatile
 
         # Ensures that T is iterable even if just one value is given
@@ -156,107 +161,88 @@ class melt_vapor_system:
         
         # Calculate fO2 for all given temperatures
         fO2 = np.zeros(len(T))
-
-        # Dev test commands below
-        # fO2_old = [1e-2]
-        # fastchem_partial_pressures = self.calculate_partial_pressures_fastchem(fO2_old,T[0])
-        
-        # print('\nCalculating vapor pressures for given temperature values')
-        # print(T)
         
         # Progressbar settings
         with tqdm(total=len(T), file=sys.stdout) as pbar: 
             for i,t in enumerate(T):
                 
                 pbar.set_description(f'Calculated')
-                
-                # if t < 2400:
-                #     fO2_initial_guess = 1e-12
-                # else:
-                #     fO2_initial_guess = 1e-8
-                
-                # if P_volatile < 1e1:
-                #     fO2_initial_guess = 1e-8
-                # else:
-                #     fO2_initial_guess = 1e-4
 
-                self.mass_balance_eq = 1e20
-                best_mb_output = 1e20        
-                count = 0
+                cached_results = self.cache.retrieve_all_cached_results(melt_comp, volatile_comp)
+                cached_value = self.cache.get_cached_value(cached_results, t, self.P_volatile)
 
-                # if t >= 3000 and P_volatile < 1e0:
-                #     fO2_tries = [1e-6,1e-5,1e-4,1e-2,1e-1,1e0,1e1,1e2,1e3]                
-                # else:
-                #     fO2_tries = [1e-12,1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-2,1e-1,1e0,1e1,1e2,1e3]                
+                # If cached value was found, skip calculation
+                if cached_value is not None:
+                    print('Found cached version for given input parameters, returning cached value.')
+                    fO2[i], O_abun_best, best_mb_output = cached_value
+
+                # If no cached value was found, perform full calculation
+                else:
+
+                    # Initialising conditions
+                    self.mass_balance_eq = 1e20
+                    best_mb_output = 1e20        
+                    count = 0
+
+                    # Search parameters
+                    maxfev = 1000
+                    factor = 90
+                    fO2_tries = 10**self.fO2_interp_func(t)*np.array([1e-3,1e-2,1e-1,1e-0,1e1,1e2])
+                    max_it = 20
+
+                    estimated_value = self.cache.interpolate_or_extrapolate_results(cached_results, t, self.P_volatile)                    
+                    # Use interpolated/extrapolated value as initial guess if possible
+                    if estimated_value is not None:
+                        fO2_tries = np.append(estimated_value, fO2_tries)
+
+                    print('fO2_tries:',fO2_tries)
     
-                # fO2_tries_less = [1e-12,1e-14,1e-16,1e-18,1e-20,1e-22,1e-24,1e-26,1e-28,1e-30]
+                    while np.abs(self.mass_balance_eq) > 1e-8 and count < len(fO2_tries):
 
-                # if P_volatile > 1e2:
-                #     factor = 2
-                # else:
-                #     factor = 90
-                # print('Factor:',factor)
+                        fO2_initial_guess = fO2_tries[count]
+                        print(f'\nTry #{count}')
+                        print('fO2 initial guess:', fO2_initial_guess)
+                        
+                        # Calculate fO2
+                        results_opt = optimize.fsolve(self.mass_balance_equation_fastchem,\
+                                                      fO2_initial_guess,args=([t],volatile_comp),xtol=1e-10,
+                                                      factor=factor, maxfev=maxfev)
+                        print('Results opt:',results_opt)
+                        print('Mass balance equation:',self.mass_balance_eq)
 
-                factor = 90
-                fO2_tries = 10**self.fO2_interp_func(t)*np.array([1e-3,1e-2,1e-1,1e0,1e1,1e2])
+                        if np.abs(self.mass_balance_eq) < np.abs(best_mb_output)+np.abs(best_mb_output)*0.1:
+                            print('Found new best solution!')
+                            fO2[i] = results_opt[0]
+                            best_mb_output = self.mass_balance_eq
+                            O_abun_best = copy(self.O_abun)
+                            count += 1
 
+                            # if self.mass_balance_eq > 10 and count == 1:
+                            #     fO2_tries = fO2_tries_less
 
-                maxfev = 1000
+                            # elif self.mass_balance_eq > 0:
+                            #     print('Going back to prev try')
+                            #     count -= 2
+                            #     factor = factor/2
 
-                while np.abs(self.mass_balance_eq) > 1e-9 and count < len(fO2_tries):
-
-                    fO2_initial_guess = fO2_tries[count]
-                    print(f'\nTry #{count}')
-                    print('fO2 initial guess:', fO2_initial_guess)
-                    
-                    # Calculate fO2
-                    results_opt = optimize.fsolve(self.mass_balance_equation_fastchem,\
-                                                  fO2_initial_guess,args=([t],volatile_comp),xtol=1e-9,
-                                                  factor=factor, maxfev=maxfev)
-                    print('Results opt:',results_opt)
-                    print('Mass balance equation:',self.mass_balance_eq)
-
-                    if np.abs(self.mass_balance_eq) < np.abs(best_mb_output)+np.abs(best_mb_output)*0.1:
-                        print('Found new best solution!')
-                        fO2[i] = results_opt[0]
-                        best_mb_output = self.mass_balance_eq
-                        O_abun_best = copy(self.O_abun)
-                        count += 1
-
-                        # if self.mass_balance_eq > 10 and count == 1:
-                        #     fO2_tries = fO2_tries_less
-
-                        # elif self.mass_balance_eq > 0:
-                        #     print('Going back to prev try')
-                        #     count -= 2
-                        #     factor = factor/2
-
-                        # elif count < len(fO2_tries) and fO2_tries[count] > 1e-12:
-                        #     # Avoids trying values that are too low
-                        #     while fO2[i]/100 > fO2_tries[count] and count < len(fO2_tries):
-                        #         # print('count +1')
-                        #         count += 1
+                            # elif count < len(fO2_tries) and fO2_tries[count] > 1e-12:
+                            #     # Avoids trying values that are too low
+                            #     while fO2[i]/100 > fO2_tries[count] and count < len(fO2_tries):
+                            #         # print('count +1')
+                            #         count += 1
 
 
-                    elif np.abs(self.mass_balance_eq) > 1e-6:
-                        count += 1                    
-                    else:
-                        count = len(fO2_tries)+1
+                        elif np.abs(self.mass_balance_eq) > 1e-6:
+                            count += 1                    
+                        else:
+                            count = len(fO2_tries)+1
 
+                    self.cache.save_to_cache(melt_comp, volatile_comp, t, self.P_volatile,\
+                                             fO2[i], O_abun_best, best_mb_output)
 
-                    # print(results_opt[0])
-                
-                # print(results_opt[1])
-                # print(results_opt[2])
-                # print(results_opt[3])
                 
                 pbar.update(1) # Update progress bar   
-    
-                # if self.is_iterable(P_boa):
-                #     P_boa = P_boa[0]
-                
-                # fO2 = fO2[i]
-                
+
                 vapor_partial_pressures = self.vapor_partial_pressure_calc(fO2[i], [t])
                 # print(vapor_partial_pressures.sum(axis=1).iloc[0])
                 P_outgassed = vapor_partial_pressures.sum(axis=1).iloc[0]+fO2[i]
@@ -414,11 +400,11 @@ class melt_vapor_system:
             retgas[index+1]
 
 
-        # print('\n  MASS BALANCE')#, mass_balance_eq)
+        # print('\n  MASS BALANCE', mass_balance_eq)
         for gas in partial_pressures.columns:
             # print('\nGas:',gas)
             contrib = 0
-            
+
             for el in self.mass_law_contribution:
 
                 if el == gas:
@@ -438,12 +424,12 @@ class melt_vapor_system:
                     # Check if there's a coefficient present
                     if index + len(el) < len(gas) and gas[index + len(el)].isdigit():
                         stoi = float(gas[index + len(el)])
-                    
+
                     # Ensures inclusion of sinle elements at end of species
                     elif index + len(el) == len(gas):
                         # print('END CHECK')
                         # print(index + len(el), '=', len(gas))
-                        stoi = 1 
+                        stoi = 1
 
                     # Avoid counting Si as S
                     elif gas[index + len(el)].isupper():
@@ -695,6 +681,7 @@ class melt_vapor_system:
         output_name = 'element_abundances_output.dat'
         solar_abund_name = 'element_abundances_solar.dat'
 
+        # self.abundance_fname = 'input/element_abundances/'+output_name
         template = open(self.abundances_location+template_name, 'r')
         elab_file = template.read()
         template.close()
@@ -956,7 +943,7 @@ class melt_vapor_system:
 
     def run_fastchem(self):
         # Check call instead of call can catch the error 
-        try: 
+        try:
             subprocess.check_call([f'./fastchem input/config.input'],\
                                   shell=True,\
                                   cwd=f'{self.fastchem_dir}/',stdout=subprocess.DEVNULL) 
