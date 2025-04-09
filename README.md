@@ -10,6 +10,8 @@ We suggest to follow the instructions on the [Thermoengine GitLab page](https://
 
 Once you have installed Thermoengine, clone this repository into the Thermoengine directory.
 
+For LavAtmos 2, FastChem is required. Can be installed by following instructions on [this page](https://newstrangeworlds.github.io/FastChem/sections/installation.html). Make sure to place the FastChem directory within the LavAtmos directory.
+
 ## Usage
 
 Ensure that you are working within the LavAtmos directory. Import LavAtmos:
@@ -45,6 +47,7 @@ License: [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 If you use LavAtmos results, please cite:
 
-- [Van Buchem et al. (in review)](https://arxiv.org/abs/2210.10463)
+- [Van Buchem et al. (2023)](https://onlinelibrary.wiley.com/doi/full/10.1111/maps.13994)
+- [Van Buchem et al. (2025)](https://www-aanda-org.ezproxy.leidenuniv.nl/articles/aa/full_html/2025/03/aa50992-24/aa50992-24.html)
 
 Since LavAtmos makes use of MELTS, MELTS should also be cited as specified on [the MELTS webpage](https://melts.ofm-research.org/).
