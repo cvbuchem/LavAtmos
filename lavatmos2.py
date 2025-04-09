@@ -155,7 +155,8 @@ class melt_vapor_system:
             T = np.array([T])
         
         # Calculate thermodynamic values
-        self.melt_comp = self.melt.set_melt_comp(melt_comp,verbose)        
+        self.melt_comp = self.melt.set_melt_comp(melt_comp,verbose) 
+        print(self.melt_comp)       
         self.melt.calculate_melt_chemical_potentials(T,P_melt,self.thermo_data)
         self.melt.calculate_melt_activities(T,P_melt)            
         self.logKr = self.logKr_calc(T,self.melt.mu0_liquid)
@@ -169,89 +170,91 @@ class melt_vapor_system:
                 
                 pbar.set_description(f'Calculated')
 
-                cached_results = self.cache.retrieve_all_cached_results(melt_comp, volatile_comp)
-                cached_value = self.cache.get_cached_value(cached_results, t, self.P_volatile)
+                # TODO enable cache feature
+                # cached_results = self.cache.retrieve_all_cached_results(melt_comp, volatile_comp)
+                # cached_value = self.cache.get_cached_value(cached_results, t, self.P_volatile)
 
                 # If cached value was found, skip calculation
-                if cached_value is not None:
-                    print('\nFound cached version for given input parameters, returning cached value.')
-                    fO2[i], O_abun_best, best_mb_output = cached_value
+                # if cached_value is not None:
+                #     print('\nFound cached version for given input parameters, returning cached value.')
+                #     fO2[i], O_abun_best, best_mb_output = cached_value
 
                 # If no cached value was found, perform full calculation
-                else:
+                # else:
 
-                    # Initialising conditions
-                    self.mass_balance_eq = 1e20
-                    best_mb_output = 1e20        
-                    count = 0
+                # Initialising conditions
+                self.mass_balance_eq = 1e20
+                best_mb_output = 1e20        
+                count = 0
 
-                    # Search parameters
-                    maxfev = 1000
-                    factor = 90
-                    fO2_tries = 10**self.fO2_interp_func(t)*np.array([1e-3,1e-2,1e-1,1e-0,1e1,1e2])
-                    max_it = 20
+                # Search parameters
+                maxfev = 1000
+                factor = 90
+                fO2_tries = 10**self.fO2_interp_func(t)*np.array([1e-3,1e-2,1e-1,1e-0,1e1,1e2])
+                max_it = 20
 
-                    estimated_value = self.cache.interpolate_or_extrapolate_results(cached_results, t, self.P_volatile)                    
-                    # Use interpolated/extrapolated value as initial guess if possible
-                    if estimated_value is not None:
-                        fO2_tries = np.append(estimated_value, fO2_tries)
+                # TODO enable extrapolation from cached values
+                # estimated_value = self.cache.interpolate_or_extrapolate_results(cached_results, t, self.P_volatile)                    
+                # # Use interpolated/extrapolated value as initial guess if possible
+                # if estimated_value is not None:
+                #     fO2_tries = np.append(estimated_value, fO2_tries)
 
-                    # print('fO2_tries:',fO2_tries)
-    
-                    while np.abs(self.mass_balance_eq) > 1e-8 and count < len(fO2_tries):
+                # print('fO2_tries:',fO2_tries)
 
-                        fO2_initial_guess = fO2_tries[count]
+                while np.abs(self.mass_balance_eq) > 1e-8 and count < len(fO2_tries):
 
-                        if verbose:
-                            print(f'\nTry #{count}')
-                            print('fO2 initial guess:', fO2_initial_guess)
+                    fO2_initial_guess = fO2_tries[count]
+
+                    if verbose:
+                        print(f'\nTry #{count}')
+                        print('fO2 initial guess:', fO2_initial_guess)
+                    
+                    # Ignores fsolve warnings if not verbose
+                    if not verbose:
+                        warnings.filterwarnings("ignore", message="xtol=0.000000 is too small", category=RuntimeWarning)
+                        warnings.filterwarnings("ignore", message="The iteration is not making good progress", category=RuntimeWarning)
+
+                    # Calculate fO2
+                    results_opt = optimize.fsolve(self.mass_balance_equation_fastchem,\
+                                                  fO2_initial_guess,args=([t],volatile_comp,verbose),xtol=1e-10,
+                                                  factor=factor, maxfev=maxfev)
                         
-                        # Ignores fsolve warnings if not verbose
-                        if not verbose:
-                            warnings.filterwarnings("ignore", message="xtol=0.000000 is too small", category=RuntimeWarning)
-                            warnings.filterwarnings("ignore", message="The iteration is not making good progress", category=RuntimeWarning)
+                    if verbose:
+                        print('Results opt:',results_opt)
+                        print('Mass balance equation:',self.mass_balance_eq)
 
-                        # Calculate fO2
-                        results_opt = optimize.fsolve(self.mass_balance_equation_fastchem,\
-                                                      fO2_initial_guess,args=([t],volatile_comp,verbose),xtol=1e-10,
-                                                      factor=factor, maxfev=maxfev)
-                            
+                    if np.abs(self.mass_balance_eq) < np.abs(best_mb_output)+np.abs(best_mb_output)*0.1:
+                        
                         if verbose:
-                            print('Results opt:',results_opt)
-                            print('Mass balance equation:',self.mass_balance_eq)
+                            print('Found new best solution!')
 
-                        if np.abs(self.mass_balance_eq) < np.abs(best_mb_output)+np.abs(best_mb_output)*0.1:
-                            
-                            if verbose:
-                                print('Found new best solution!')
-    
-                            fO2[i] = results_opt[0]
-                            best_mb_output = self.mass_balance_eq
-                            O_abun_best = copy(self.O_abun)
-                            count += 1
+                        fO2[i] = results_opt[0]
+                        best_mb_output = self.mass_balance_eq
+                        O_abun_best = copy(self.O_abun)
+                        count += 1
 
-                            # if self.mass_balance_eq > 10 and count == 1:
-                            #     fO2_tries = fO2_tries_less
+                        # if self.mass_balance_eq > 10 and count == 1:
+                        #     fO2_tries = fO2_tries_less
 
-                            # elif self.mass_balance_eq > 0:
-                            #     print('Going back to prev try')
-                            #     count -= 2
-                            #     factor = factor/2
+                        # elif self.mass_balance_eq > 0:
+                        #     print('Going back to prev try')
+                        #     count -= 2
+                        #     factor = factor/2
 
-                            # elif count < len(fO2_tries) and fO2_tries[count] > 1e-12:
-                            #     # Avoids trying values that are too low
-                            #     while fO2[i]/100 > fO2_tries[count] and count < len(fO2_tries):
-                            #         # print('count +1')
-                            #         count += 1
+                        # elif count < len(fO2_tries) and fO2_tries[count] > 1e-12:
+                        #     # Avoids trying values that are too low
+                        #     while fO2[i]/100 > fO2_tries[count] and count < len(fO2_tries):
+                        #         # print('count +1')
+                        #         count += 1
 
 
-                        elif np.abs(self.mass_balance_eq) > 1e-6:
-                            count += 1                    
-                        else:
-                            count = len(fO2_tries)+1
+                    elif np.abs(self.mass_balance_eq) > 1e-6:
+                        count += 1                    
+                    else:
+                        count = len(fO2_tries)+1
 
-                    self.cache.save_to_cache(melt_comp, volatile_comp, t, self.P_volatile,\
-                                             fO2[i], O_abun_best, best_mb_output)
+                self.cache.save_to_cache(melt_comp, volatile_comp, t, self.P_volatile,\
+                                         fO2[i], O_abun_best, best_mb_output)
 
                 
                 pbar.update(1) # Update progress bar   
@@ -259,6 +262,7 @@ class melt_vapor_system:
                 vapor_partial_pressures = self.vapor_partial_pressure_calc(fO2[i], [t])
                 # print(vapor_partial_pressures.sum(axis=1).iloc[0])
                 P_outgassed = vapor_partial_pressures.sum(axis=1).iloc[0]+fO2[i]
+                print(P_outgassed)
                 P_boa = P_outgassed + self.P_volatile
                 partial_pressures = self.calculate_partial_pressures_fastchem_loop([O_abun_best],[t],fO2[i],[P_boa],vapor_partial_pressures,volatile_comp)
         
